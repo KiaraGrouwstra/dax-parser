@@ -1,0 +1,113 @@
+; http://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part2.html
+
+; 5 Expression Syntax
+
+; 5.2 Basic Expressions
+Formula ::= Intro? Expression
+Intro ::= '=' ForceRecalc?
+ForceRecalc ::= '='
+
+Expression ::=
+    Whitespace* (
+    Number |
+    String |
+    Array |
+    PrefixOp Expression |
+    Expression PostfixOp |
+    Expression InfixOp Expression |
+    '(' Expression ')' |
+    FunctionName Whitespace* '(' ParameterList ')' |
+    Reference |
+    QuotedLabel |
+    AutomaticIntersection |
+    NamedExpression |
+    Error
+    ) Whitespace*
+SingleQuoted ::= "'" ([^'] | "''")+ "'"
+
+; 5.3 Constant Numbers
+Number ::= StandardNumber |
+   '.' [0-9]+ ([eE] [-+]? [0-9]+)?
+StandardNumber ::= [0-9]+ ('.' [0-9]+)? ([eE] [-+]? [0-9]+)?
+
+; 5.4 Constant Strings
+String ::= '"' ([^"#x00] | '""')* '"'
+
+; 5.5 Operators
+PrefixOp ::= '+' | '-'
+PostfixOp ::= '%'
+InfixOp ::= ArithmeticOp | ComparisonOp | StringOp | ReferenceOp
+ArithmeticOp ::= '+' | '-' | '*' | '/' | '^'
+ComparisonOp ::= '=' | '<>' | '<' | '>' | '<=' | '>='
+StringOp ::= '&'
+
+ReferenceOp ::= IntersectionOp | ReferenceConcatenationOp | RangeOp
+IntersectionOp ::= '!'
+ReferenceConcatenationOp ::= '~'
+RangeOp ::= ':'
+
+; 5.6 Functions and Function Parameters
+FunctionName ::=  LetterXML (LetterXML | DigitXML |
+    '_' | '.' | CombiningCharXML)*
+
+ParameterList ::= /* empty */ |
+    Parameter (Separator EmptyOrParameter )* |
+    Separator EmptyOrParameter /* First param empty */
+    (Separator EmptyOrParameter )*
+EmptyOrParameter ::= /* empty */ Whitespace* | Parameter
+Parameter ::= Expression
+Separator ::= ';'
+
+; 5.8 References
+Reference ::= '[' (Source? RangeAddress) | ReferenceError ']'
+RangeAddress ::=
+ SheetLocatorOrEmpty '.' Column Row (':' '.' Column Row )? |
+ SheetLocatorOrEmpty '.' Column ':' '.' Column |
+ SheetLocatorOrEmpty '.' Row ':' '.' Row |
+ SheetLocator '.' Column Row ':' SheetLocator '.' Column Row |
+ SheetLocator '.' Column ':' SheetLocator '.' Column |
+ SheetLocator '.' Row ':' SheetLocator '.' Row
+SheetLocatorOrEmpty ::= SheetLocator | /* empty */
+SheetLocator ::= SheetName ('.' SubtableCell)*
+SheetName ::= QuotedSheetName | '$'? [^\]\. #$']+
+QuotedSheetName ::= '$'? SingleQuoted
+SubtableCell ::= ( Column Row ) | QuotedSheetName
+ReferenceError ::= "#REF!"
+Column ::= '$'? [A-Z]+
+Row ::= '$'? [1-9] [0-9]*
+Source ::= "'" IRI "'" "#"
+CellAddress ::= SheetLocatorOrEmpty '.' Column Row /* Not used directly */
+
+; 5.9 Reference List
+ReferenceList ::= Reference (Whitespace* ReferenceConcatenationOp Whitespace* Reference)*
+
+; 5.10 Quoted Label
+QuotedLabel ::= SingleQuoted
+
+AutomaticIntersection ::= QuotedLabel Whitespace* '!!' Whitespace* QuotedLabel
+
+; 5.11 Named Expressions
+NamedExpression ::= SimpleNamedExpression |
+    SheetLocalNamedExpression | ExternalNamedExpression
+SimpleNamedExpression ::= Identifier |
+    '$$' (Identifier | SingleQuoted)
+SheetLocalNamedExpression ::=
+    QuotedSheetName '.' SimpleNamedExpression
+ExternalNamedExpression ::=
+    Source (SimpleNamedExpression | SheetLocalNamedExpression)
+
+Identifier ::= ( LetterXML
+  (LetterXML | DigitXML | '_' | CombiningCharXML)* )
+- ( [A-Za-z]+[0-9]+ )
+- ([Tt][Rr][Uu][Ee]) - ([Ff][Aa][Ll][Ss][Ee])
+
+; 5.12 Constant Errors
+Error ::= '#' [A-Z0-9]+ ([!?] | ('/' ([A-Z] | ([0-9] [!?]))))
+
+; 5.13 Inline Arrays
+Array ::= '{' MatrixRow ( RowSeparator MatrixRow )* '}'
+MatrixRow ::= Expression ( ';' Expression )*
+RowSeparator ::= '|'
+
+; 5.14 Whitespace
+Whitespace ::= #x20 | #x09 | #x0a | #x0d
