@@ -21,6 +21,7 @@ Expression = do
     spaces
     ExprType
     spaces
+
 ExprType = do
         Number
     <|> String
@@ -36,26 +37,32 @@ ExprType = do
     <|> NamedExpression
     <|> Error
     <?> "ExprType"
+
 PrefixedExpr = do
     PrefixOp
     Expression
+
 PostfixedExpr = do
     Expression
     PostfixOp
+
 InfixedExpr = do
     Expression
     InfixOp
     Expression
+
 QuotedExpr = do
     char '('
     Expression
     char ')'
+
 FunctionCall = do
     FunctionName
     spaces
     char '('
     ParameterList
     char ')'
+
 SingleQuoted = do
     char '\''
     content <- many $ string "''" <|> noneOf "'" <?> "any character but '"
@@ -108,6 +115,7 @@ RangeOp = char ':'
 FunctionName = do
     LetterXML
     many FunctionNameChar
+
 FunctionNameChar = do
     LetterXML
     <|> DigitXML
@@ -141,6 +149,7 @@ Reference = do
         RangeAddress
     <?> "Reference"
     ']'
+
 RangeAddress = do
         do
             SheetLocatorOrEmpty

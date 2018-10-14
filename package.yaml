@@ -39,7 +39,7 @@ github: tycho01/daxparser
 library:
   dependencies:
   - base
-  - megaparsec
+  - attoparsec
   source-dirs: library
 license: MIT
 maintainer: Tycho Grouwstra
@@ -49,7 +49,6 @@ tests:
   daxparser-test-suite:
     dependencies:
     - base
-    - megaparsec
     - daxparser
     - tasty
     - tasty-hspec
